@@ -1,30 +1,33 @@
 const mongoose = require("mongoose");
 
-
-const topicSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-        maxlength: [50, "Topic title must not exceed more than 50 characters"],
-    unique: [true, "Topic already exists"]
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
-const categorySchema = new mongoose.Schema({
+const categorySchema = new mongoose.Schema(
+  {
     title: {
-        type: String,
-        unique: [true, "Cagtegory already exists"],
-        maxlength: [50, "Category name must not exceed more than 50 characters"],
-        trim: true,
+      type: String,
+      unique: [true, "Category already exists"],
+      maxlength: [50, "Category name must not exceed more than 50 characters"],
+      trim: true,
     },
-    topics: {
-        type: [topicSchema]
-    }
-})
+    description: {
+      type: String,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { timestamps: true }
+);
 
-const Category = mongoose.model('Category', categorySchema);
+categorySchema.pre("findOneAndDelete", async function (next) {
+    const categoryId = this.getQuery() && this.getQuery()._id;
+    await mongoose.model("Topic").deleteMany({ category: categoryId });
+    next();
+  }
+);
+const Category = mongoose.model("Category", categorySchema);
 module.exports = Category;

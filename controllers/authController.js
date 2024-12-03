@@ -1,3 +1,4 @@
+const asyncErrorHandler = require('../utils/asyncErrorHandler');
 const CustomError = require('./../utils/CustomError');
 
 exports.protect = (req, res, next) => {
@@ -8,3 +9,5 @@ exports.protect = (req, res, next) => {
     const error = new CustomError('Access Denied', 403);
     next(error);
 }
+
+
