@@ -1,4 +1,3 @@
-const asyncErrorHandler = require('../utils/asyncErrorHandler');
 const CustomError = require('./../utils/CustomError');
 
 exports.protect = (req, res, next) => {

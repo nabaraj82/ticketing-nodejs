@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const cron = require("node-cron");
 const firebaseAdmin = require("firebase-admin");
 const serviceAccount = require("./firebase-service-account.json");
 const Admin = require("./model/adminModel");
@@ -8,6 +9,7 @@ dotenv.config({
 });
 
 const app = require("./app");
+const { deleteResolvedTickets } = require("./controllers/ticketController");
 
 const port = process.env.PORT || 4001;
 console.log(port);
@@ -57,3 +59,5 @@ async function checkAndCreateSuperAdmin() {
     console.error("Error creating superadmin:", err);
   }
 }
+
+cron.schedule('*/2 * * * *', deleteResolvedTickets);  // Run every day at midnight

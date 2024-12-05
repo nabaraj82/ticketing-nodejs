@@ -6,6 +6,7 @@ const authController = require('./../controllers/authController')
 const upload = require('./../multerConfig');
 
 router.route('/createTicket').post(authController.protect,upload.single('image'), ticketController.createTicket);
+// router.route('/createTicket').post(authController.protect,ticketController.createTicket);
 
 router.route('/getAllTickets').get(adminAuthController.protect, ticketController.getAllTickets);
 

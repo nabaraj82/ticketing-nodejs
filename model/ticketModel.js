@@ -26,7 +26,7 @@ const ticketSchema = new mongoose.Schema(
             type: String,
             required: [true, 'description is required']
         },
-        imageURL: {
+        imageName: {
             type: String
         },
         status: {
