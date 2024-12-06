@@ -65,4 +65,4 @@ async function checkAndCreateSuperAdmin() {
   }
 }
 
-cron.schedule('*/2 * * * *', deleteResolvedTickets);  // Run every day at midnight
+cron.schedule('0 0 * * *', deleteResolvedTickets);  // Run every day at midnight
