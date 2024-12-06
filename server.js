@@ -32,6 +32,11 @@ firebaseAdmin.initializeApp({
 
 const server = app.listen(port, () => {
   console.log(`Server has started at http://localhost:${port}`);
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Running in production mode');
+  } else {
+    console.log('Running in development mode');
+  }
 });
 process.on("unhandledRejection", (err) => {
   console.log(err.name, err.message);
