@@ -40,11 +40,7 @@ app.use("*",cors(corsOptions));
 
 
 app.use(express.json());
-
-
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
-}
+app.use(morgan("combined"));
 app.use('/api/v1/category', categoryRouter);
 app.use('/api/v1/topic', topicRouter);
 app.use('/api/v1/admin', adminAuthRouter);

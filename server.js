@@ -11,7 +11,7 @@ dotenv.config({
 const app = require("./app");
 const { deleteResolvedTickets } = require("./controllers/ticketController");
 
-const port = process.env.PORT || 4001;
+const port = process.env.PORT || 4000;
 console.log(port);
 process.on("uncaughtException", (err, origin) => {
   console.log(err.name, err.message);

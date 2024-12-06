@@ -97,7 +97,6 @@ exports.getAllTickets = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.getAllTicketsByUsername = asyncErrorHandler(async (req, res, next) => {
-  console.log(req.headers['username'])
   const tickets = await Ticket.find({ username: req.headers["username"] });
   if (tickets.length <= 0) {
     return res.status(200).json({
