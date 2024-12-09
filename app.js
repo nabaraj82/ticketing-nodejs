@@ -29,7 +29,7 @@ app.use("/api", limiter);
 app.use("/public", express.static(path.join(__dirname, "public")));
 
 const corsOptions = {
-  origin: "http://localhost:3039", // Only allow requests from this origin
+  origin: "http://localhost:3000", // Only allow requests from this origin
   methods: ["GET,HEAD,PUT,PATCH,POST,DELETE"],
   allowedHeaders: ["Content-Type", "Authorization", "Secret-Key"], // Allowed headers
   credentials: true, // Allow credentials (cookies, HTTP authentication)
