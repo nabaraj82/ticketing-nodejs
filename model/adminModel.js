@@ -9,9 +9,9 @@ const adminSchema = new mongoose.Schema({
         trim: true,
     },
     role: {
-        type: [String],
-        enum: ['superadmin', 'admin'],
-        default: ['admin'],
+        type: String,
+        enum: ['super-admin', 'admin', 'operator'],
+        default: 'operator',
         required: true
     },
     password: {

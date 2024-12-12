@@ -5,62 +5,154 @@ const CustomError = require("../utils/CustomError");
 const randomImageName = require("./../utils/randomImageName");
 const s3 = require("./../aws-config");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-const { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
-const generateSignedUrlsForTickets = require("../utils/generateSignedUrlsForTickets");
+const {
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+} = require("@aws-sdk/client-s3");
+const { response } = require("../app");
 
 exports.createTicket = asyncErrorHandler(async (req, res, next) => {
-  // const imageURL = req.file
-  //   ? `http://localhost:4000/public/images/${req.file.filename}`
-  //   : null;
+  const imageNames = [];
+  if (req.files.length > 0) {
+    for (const file of req.files) {
+      const imageName = randomImageName();
+      const params = {
+        Bucket: process.env.BUCKET_NAME,
+        Key: imageName,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+      };
+      const putCommand = new PutObjectCommand(params);
+      await s3.send(putCommand);
+      imageNames.push(imageName);
+    }
 
-  const imageName = randomImageName();
+    const newTicket = new Ticket({
+      name: req.body.name,
+      username: req.body.username,
+      mobileNo: req.body.mobileNo,
+      category: req.body.category,
+      topic: req.body.topic,
+      description: req.body.description,
+      imageNames: imageNames,
+    });
+    const savedTicket = await newTicket.save();
 
-  const params = {
-    Bucket: process.env.BUCKET_NAME,
-    Key: imageName,
-    Body: req.file.buffer,
-    ContentType: req.file.mimetype,
-  };
-  const putCommand = new PutObjectCommand(params);
-  await s3.send(putCommand);
-  const newTicket = new Ticket({
-    name: req.body.name,
-    username: req.body.username,
-    mobileNo: req.body.mobileNo,
-    category: req.body.category,
-    topic: req.body.topic,
-    description: req.body.description,
-    imageName: imageName,
-  });
-  const savedTicket = await newTicket.save();
+    const imageUrls = [];
 
-  const getObjectParams = {
-    Bucket: process.env.BUCKET_NAME,
-    Key: savedTicket.imageName,
-  };
+    for (const imageName of savedTicket.imageNames) {
+      const getObjectParams = {
+        Bucket: process.env.BUCKET_NAME,
+        Key: imageName,
+      };
+      const getCommand = new GetObjectCommand(getObjectParams);
+      const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
+      imageUrls.push(url);
+    }
 
-  const getCommand = new GetObjectCommand(getObjectParams);
-  const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
-  const responseTicket = { ...savedTicket.toObject(), imageURL: url };
-  // const message = {
-  //   notification: {
-  //     title: "Issue Raised",
-  //     body: "New Ticket has been created",
-  //   },
-  //   token:
-  //     "eBgIm2opEDmvHcIO2FdRxH:APA91bEnYCF9TCQLB_ogUb3V3v0jTrDJ5VGHZe3MeDmM6joKpd8LmgzQfTXPt6GddlYdP6gNnm1SNLc8LzTA9hvNu3DKKf4c8qnKGoPDiIWFkZaFd77Q7qg",
-  // };
-  // firebaseAdmin
-  //   .messaging()
-  //   .send(message)
-  //   .then((response) => {
-  //     // Response is a message ID string.
-  //     console.log("Successfully sent message:", response);
-  //   })
+    const responseTicket = { ...savedTicket.toObject(), imageUrls };
+    res.status(201).json({
+      status: "success",
+      message: "New ticket created successfully",
+      data: {
+        ticket: responseTicket,
+      },
+    });
+  } else {
+    const newTicket = new Ticket({
+      name: req.body.name,
+      username: req.body.username,
+      mobileNo: req.body.mobileNo,
+      category: req.body.category,
+      topic: req.body.topic,
+      description: req.body.description,
+      imageNames: [],
+    });
+    const savedTicket = await newTicket.save();
+    res.status(201).json({
+      status: "success",
+      message: "New ticket created successfully",
+      data: {
+        ticket: savedTicket,
+      },
+    });
+  }
+});
 
-  res.status(201).json({
+exports.updateTicketByUser = asyncErrorHandler(async (req, res, next) => {
+  const ticketToUpdate = await Ticket.findById(req.body.id);
+  if (!ticketToUpdate) {
+    res.status(200).json({
+      status: "success",
+      message: "Ticket does not exits.",
+    });
+    return;
+  }
+  if (ticketToUpdate.status !== "pending") {
+    res.status(200).json({
+      status: "success",
+      message: "The update cannot be made as it is already in progress.",
+    });
+    return;
+  }
+  const newImageNames = [];
+  let newTicketObject = {};
+  const imageUrls = [];
+
+  if (req.body.imageNames?.length > 0) {
+    const imageNames = req.body.imageNames;
+    for (const imageName of imageNames) {
+      const params = {
+        Bucket: process.env.BUCKET_NAME,
+        Key: imageName,
+      };
+
+      const command = new DeleteObjectCommand(params);
+      await s3.send(command);
+    }
+  }
+  if (req.files.length > 0) {
+    for (const file of req.files) {
+      const imageName = randomImageName();
+      const params = {
+        Bucket: process.env.BUCKET_NAME,
+        Key: imageName,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+      };
+      const command = new PutObjectCommand(params);
+      await s3.send(command);
+      newImageNames.push(imageName);
+    }
+  }
+
+  newTicketObject.category = req.body.category;
+  newTicketObject.topic = req.body.topic;
+  newTicketObject.description = req.body.description;
+  newTicketObject.imageNames = newImageNames;
+
+  const updatedTicket = await Ticket.findByIdAndUpdate(
+    req.body.id,
+    newTicketObject,
+    { new: true }
+  );
+
+  for (const imageName of updatedTicket.imageNames) {
+    const params = {
+      Bucket: process.env.BUCKET_NAME,
+      Key: imageName,
+    };
+
+    const command = new GetObjectCommand(params);
+    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    imageUrls.push(url);
+  }
+  const responseTicket = { ...updatedTicket.toObject(), imageUrls };
+
+  res.status(200).json({
     status: "success",
-    message: "New ticket created successfully",
+    message: "ticket updated successfully",
     data: {
       ticket: responseTicket,
     },
@@ -73,25 +165,32 @@ exports.getAllTickets = asyncErrorHandler(async (req, res, next) => {
     return res.status(200).json({
       status: "success",
       message: "No ticket has been created",
-      data: []
+      data: [],
     });
   }
   const responseTickets = [];
   for (const ticket of tickets) {
-    const getObjectParams = {
-      Bucket: process.env.BUCKET_NAME,
-      Key: ticket.imageName
+    const imageUrls = [];
+    for (imageName of ticket.imageNames) {
+      const getObjectParams = {
+        Bucket: process.env.BUCKET_NAME,
+        Key: imageName,
+      };
+      const getCommand = new GetObjectCommand(getObjectParams);
+      const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
+      imageUrls.push(url);
     }
-    const getCommand = new GetObjectCommand(getObjectParams);
-    const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
-    const ticketObj = { ...ticket.toObject(), imageURL: url };
-    responseTickets.push(ticketObj)
+
+    const originalObject = ticket.toObject();
+    delete originalObject.imageNames;
+    const ticketObj = { ...originalObject, imageUrls };
+    responseTickets.push(ticketObj);
   }
 
   res.status(200).json({
     status: "success",
     data: {
-      tickets: responseTickets
+      tickets: responseTickets,
     },
   });
 });
@@ -102,26 +201,33 @@ exports.getAllTicketsByUsername = asyncErrorHandler(async (req, res, next) => {
     return res.status(200).json({
       status: "success",
       message: "No ticket has been created",
-      data: []
-    })
+      data: [],
+    });
   }
-  
+
   const responseTickets = [];
   for (const ticket of tickets) {
-    const getObjectParams = {
-      Bucket: process.env.BUCKET_NAME,
-      Key: ticket.imageName
+    const imageUrls = [];
+    for (imageName of ticket.imageNames) {
+      const getObjectParams = {
+        Bucket: process.env.BUCKET_NAME,
+        Key: imageName,
+      };
+      const getCommand = new GetObjectCommand(getObjectParams);
+      const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
+      imageUrls.push(url);
     }
-    const getCommand = new GetObjectCommand(getObjectParams);
-    const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
-    const ticketObj = { ...ticket.toObject(), imageURL: url };
-    responseTickets.push(ticketObj)
+
+    const originalObject = ticket.toObject();
+    // delete originalObject.imageNames;
+    const ticketObj = { ...originalObject, imageUrls };
+    responseTickets.push(ticketObj);
   }
 
   res.status(200).json({
     status: "success",
     data: {
-      tickets: responseTickets
+      tickets: responseTickets,
     },
   });
 });
@@ -139,50 +245,73 @@ exports.updateTicketStatus = asyncErrorHandler(async (req, res, next) => {
     return next(error);
   }
 
-  const getObjectParams = {
-    Bucket: process.env.BUCKET_NAME,
-    Key: updatedTicket.imageName,
+  if (updatedTicket.imageNames.length > 0) {
+    const imageUrls = [];
+    for (imageName of updatedTicket.imageNames) {
+      const getObjectParams = {
+        Bucket: process.env.BUCKET_NAME,
+        Key: imageName,
+      };
+
+      const getCommand = new GetObjectCommand(getObjectParams);
+      const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
+      imageUrls.push(url);
+    }
+
+    const originalObject = updatedTicket.toObject();
+    // delete originalObject.imageNames;
+
+    const updatedResponseTicket = {
+      ...originalObject,
+      imageUrls,
+    };
+    res.status(200).json({
+      status: "success",
+      message: "status updated successfully",
+      data: {
+        ticket: updatedResponseTicket,
+      },
+    });
+  } else {
+    res.status(200).json({
+      status: "success",
+      message: "status updated successfully",
+      data: {
+        ticket: updatedTicket,
+      },
+    });
   }
-
-  const getCommand = new GetObjectCommand(getObjectParams);
-  const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
-  const updatedResponseTicket = { ...updatedTicket.toObject(), imageURL: url };
-
-  res.status(200).json({
-    status: "success",
-    message: "status updated successfully",
-    data: {
-      ticket: updatedResponseTicket,
-    },
-  });
 });
 
 exports.deleteResolvedTickets = asyncErrorHandler(async () => {
-   const oneMonthAgo = new Date();
-   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
   try {
     const ticketsToDelete = await Ticket.find({
       status: "resolved",
-      createdAt: {$lt: oneMonthAgo}
+      createdAt: { $lt: oneMonthAgo },
     });
 
     if (ticketsToDelete.length > 0) {
       for (const ticket of ticketsToDelete) {
-        const params = {
-          Bucket: process.env.BUCKET_NAME,
-          Key: ticket.imageName,
-        };
-        const command = new DeleteObjectCommand(params);
-        await s3.send(command);
+        if (ticket.imageNames.length > 0) {
+          for (const imageName of ticket.imageNames) {
+            const params = {
+              Bucket: process.env.BUCKET_NAME,
+              Key: imageName,
+            };
+            const command = new DeleteObjectCommand(params);
+            await s3.send(command);
+          }
+        }
       }
     }
     const result = await Ticket.deleteMany({
       status: "resolved",
-      createdAt: { $lt: oneMonthAgo}
+      createdAt: { $lt: oneMonthAgo },
     });
     console.log(`Deleted ${result.deletedCount} tickets.`);
   } catch (error) {
     console.error("Error deleting tickets:", err);
   }
-})
-
+});

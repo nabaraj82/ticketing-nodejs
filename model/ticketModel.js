@@ -26,12 +26,12 @@ const ticketSchema = new mongoose.Schema(
             type: String,
             required: [true, 'description is required']
         },
-        imageName: {
-            type: String
+        imageNames: {
+            type: [String]
         },
         status: {
             type: String,
-            enum: ['pending', 'opened', 'resolved'],
+            enum: ['pending', 'in-progress', 'resolved', 'unresolved'],
             default: 'pending',
         }
 

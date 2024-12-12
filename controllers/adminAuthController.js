@@ -36,26 +36,17 @@ exports.signIn = asyncErrorHandler(async (req, res, next) => {
 
   const token = generateToken(
     updatedAdmin._id,
-    updatedAdmin.role[0],
+    updatedAdmin.role,
     updatedAdmin.tokenVersion
   );
   tokenResponse(200, "LoggedIn successfully.", token, res, updatedAdmin);
 });
 
 exports.protect = asyncErrorHandler(async (req, res, next) => {
-  // const testToken = req.headers.authorization;
   const token = req.cookies.jwt;
-  // if (
-  //   !testToken ||
-  //   !testToken === "Bearer null" ||
-  //   !testToken.startsWith("Bearer")
-  // ) {
-  //   return next(new CustomError("Invalid Token", 401));
-  // }
   if (!token) {
     return next(new CustomError("Invalid Token", 401));
   }
-  // const token = testToken.split(" ")[1];
   const decodedToken = await util.promisify(jwt.verify)(
     token,
     process.env.SECRET_KEY
@@ -76,3 +67,5 @@ exports.protect = asyncErrorHandler(async (req, res, next) => {
   req.admin = admin;
   next();
 });
+
+

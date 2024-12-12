@@ -32,10 +32,10 @@ firebaseAdmin.initializeApp({
 
 const server = app.listen(port, () => {
   console.log(`Server has started at http://localhost:${port}`);
-  if (process.env.NODE_ENV === 'production') {
-    console.log('Running in production mode');
+  if (process.env.NODE_ENV === "production") {
+    console.log("Running in production mode");
   } else {
-    console.log('Running in development mode');
+    console.log("Running in development mode");
   }
 });
 process.on("unhandledRejection", (err) => {
@@ -43,26 +43,26 @@ process.on("unhandledRejection", (err) => {
   console.log("Unhandled rejection occured! Shutting down...");
   server.close(() => {
     process.exit(1);
-    });
   });
+});
 
 async function checkAndCreateSuperAdmin() {
   try {
     const adminCount = await Admin.countDocuments();
     if (adminCount === 0) {
       const superAdmin = new Admin({
-        username: "admin",
-        role: ["superadmin"],
+        username: "super@admin",
+        role: "super-admin",
         password: "123456",
       });
       await superAdmin.save();
-      console.log("Superadmin created successfully");
+      console.log("Super-admin created successfully");
     } else {
-      console.log("Admins already exist. Skipping superadmin creation.");
+      console.log("Admins already exist. Skipping super-admin creation.");
     }
   } catch (error) {
-    console.error("Error creating superadmin:", err);
+    console.error("Error creating super-admin:", err);
   }
 }
 
-cron.schedule('0 0 * * *', deleteResolvedTickets);  // Run every day at midnight
+cron.schedule("0 0 * * *", deleteResolvedTickets); // Run every day at midnight
