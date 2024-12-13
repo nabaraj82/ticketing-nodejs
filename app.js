@@ -1,19 +1,21 @@
-const express = require('express');
+const express = require("express");
 const compression = require("compression");
-const helmet = require('helmet');
+const helmet = require("helmet");
 const xss = require("xss-clean");
 const sanitize = require("express-mongo-sanitize");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const path = require('path');
+const path = require("path");
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
-const globalErrorHandler = require('./controllers/errorController');
-const categoryRouter = require('./routes/categoryRoute');
-const topicRouter = require('./routes/topicRoute');
-const adminAuthRouter = require('./routes/adminAuthRoute');
-const ticketRouter = require('./routes/ticketRoute')
-const CustomError = require('./utils/CustomError');
+const globalErrorHandler = require("./controllers/errorController");
+const categoryRouter = require("./routes/categoryRoute");
+const topicRouter = require("./routes/topicRoute");
+const adminAuthRouter = require("./routes/authRoute");
+const ticketRouter = require("./routes/ticketRoute");
+const superAdminRouter = require("./routes/superAdminRoute");
+const adminRouter = require('./routes/adminRoute');
+const CustomError = require("./utils/CustomError");
 let app = express();
 app.use(cookieParser());
 app.use(compression()); //to compress response body to optimize performance
@@ -35,24 +37,24 @@ const corsOptions = {
   credentials: true, // Allow credentials (cookies, HTTP authentication)
 };
 
-
-app.use("*",cors(corsOptions));
-
+app.use("*", cors(corsOptions));
 
 app.use(express.json());
 app.use(morgan("combined"));
-app.use('/api/v1/category', categoryRouter);
-app.use('/api/v1/topic', topicRouter);
-app.use('/api/v1/admin', adminAuthRouter);
-app.use('/api/v1/ticket', ticketRouter);
+app.use("/api/v1/category", categoryRouter);
+app.use("/api/v1/topic", topicRouter);
+app.use("/api/v1/admin", adminAuthRouter);
+app.use("/api/v1/ticket", ticketRouter);
+app.use("/api/v1/super-admin", superAdminRouter);
+app.use("/api/v1/admin", adminRouter)
 
-app.all('*', (req, res, next) => {
-      const err = new CustomError(
-        `Can't find ${req.originalUrl} on the server`,
-        404
-    );
-    next(err);
-})
+app.all("*", (req, res, next) => {
+  const err = new CustomError(
+    `Can't find ${req.originalUrl} on the server`,
+    404
+  );
+  next(err);
+});
 
 app.use(globalErrorHandler);
 module.exports = app;

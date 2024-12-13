@@ -1,23 +1,24 @@
 const express = require("express");
 const topicController = require("./../controllers/topicController");
-const adminAuthController = require("./../controllers/adminAuthController");
+const authController = require("../controllers/autController");
+const middlewares = require('../middlewares/protectAdminRoute')
 
 const router = express.Router();
 
 router
   .route("/createTopic")
-  .post(adminAuthController.protect, topicController.createTopic);
+  .post(middlewares.protectAdmin, topicController.createTopic);
 router
   .route("/getAllTopics")
-  .get(adminAuthController.protect, topicController.getAllTopics);
+  .get(authController.protect, topicController.getAllTopics);
 router
   .route("/getAllTopicsByCategory/:id")
-  .get(adminAuthController.protect, topicController.getAllTopicsByCategory);
+  .get(authController.protect, topicController.getAllTopicsByCategory);
 router
   .route("/updateTopic/:id")
-  .put(adminAuthController.protect, topicController.updateTopic);
+  .put(middlewares.protectAdmin, topicController.updateTopic);
 router
   .route("/deleteTopic/:id")
-  .delete(adminAuthController.protect, topicController.deleteTopic);
+  .delete(middlewares.protectAdmin, topicController.deleteTopic);
 
 module.exports = router;
