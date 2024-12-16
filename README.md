@@ -35,7 +35,7 @@ Ensure you have the following installed on your system:
 
 ### Deployment
 1. Pull Latest Code
-First, ensure you have the latest version of the project. Navigate to the project folder and run: (/var/www/ticketin-backend)
+First, ensure you have the latest version of the project. Navigate to the project folder and run: (/var/www/ticketing-backend)
 2. Update package.json for Production
 If you have previously been using nodemon for development, switch it to node for production. In your package.json file, update the start script to use node instead of nodemon:
 3. Verify CORS Configuration
@@ -43,3 +43,4 @@ Ensure that your CORS (Cross-Origin Resource Sharing) settings are configured co
 4. Restart the Application in Production with PM2
 After making the necessary changes, you can start the application using PM2 to keep it running in the background and manage the process in production:
 pm2 restart id/process name
+# note: server: ticketing-server, folder: /var/www/ticketing-backend
