@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const ticketController = require("./../controllers/ticketController");
-const authController = require("../controllers/autController");
+const authController = require("../controllers/authController");
 const upload = require("./../multerConfig");
 const middlewares = require("../middlewares/protectTicketRoute");
 

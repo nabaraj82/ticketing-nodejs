@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 
 
 exports.createUser = asyncErrorHandler(async (req, res, next) => {
-  const { username, password, role } = req.headers;
+  const { username, password, role } = req.body;
 
   if (await Admin.findOne({ username })) {
     res.status(409).json({
@@ -13,10 +13,18 @@ exports.createUser = asyncErrorHandler(async (req, res, next) => {
     });
     return;
   }
-  if (role === "admin" || role === "super-admin") {
+    if (role === "super-admin") {
+      res.status(401).json({
+        status: "failed",
+        message: "Unauthorized: you cannot create admin or super-admin",
+      });
+      return;
+    }
+
+  if (role === 'admin' || role==='super-admin' && req.admin.role === 'admin') {
     res.status(401).json({
       status: "failed",
-      message: "you are not authorized to create super-admin or admin",
+      message: "Unauthorized: you cannot create admin or super-admin",
     });
     return;
   }
@@ -34,6 +42,17 @@ exports.createUser = asyncErrorHandler(async (req, res, next) => {
     },
   });
 });
+
+exports.fetchAllUsers = asyncErrorHandler(async(req, res, next) => {
+  const users = await Admin.find({ role: { $ne: 'super-admin' } });
+  res.status(200).json({
+    status: "success",
+    data: {
+      total: users.length,
+      users,
+    }
+  })
+})
 exports.updateUserPassword = asyncErrorHandler(async (req, res, next) => {
     const { id, password } = req.body;
     const user = await Admin.findById(id);
@@ -47,7 +66,14 @@ exports.updateUserPassword = asyncErrorHandler(async (req, res, next) => {
           message: "Unauthorized: You cannot update the super-admin password",
         });
         return;
-    }
+  }
+  if (user.role === 'admin' && req.admin.role === 'admin') {
+    res.status(401).json({
+      status: "failed",
+      message: "Unauthorized: you cannot update admin or super-admin password",
+    });
+    return;
+  }
   const hashedPassword = await bcrypt.hash(password, 12);
 
   const updatedUser = await Admin.findByIdAndUpdate(
@@ -66,7 +92,7 @@ exports.updateUserPassword = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.deleteUser = asyncErrorHandler(async (req, res, next) => {
-  const admin = await Admin.findById(req.body.id);
+  const admin = await Admin.findById(req.params.id);
   if (!admin) {
     res.status(404).json({
       status: "failed",
@@ -81,7 +107,7 @@ exports.deleteUser = asyncErrorHandler(async (req, res, next) => {
     });
     return;
   }
-  await Admin.findByIdAndDelete(req.body.id);
+  await Admin.findByIdAndDelete(req.params.id);
   res.status(204).json({
     status: "success",
     message: "user deleted successfully",

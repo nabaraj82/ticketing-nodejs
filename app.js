@@ -13,7 +13,6 @@ const categoryRouter = require("./routes/categoryRoute");
 const topicRouter = require("./routes/topicRoute");
 const adminAuthRouter = require("./routes/authRoute");
 const ticketRouter = require("./routes/ticketRoute");
-const superAdminRouter = require("./routes/superAdminRoute");
 const adminRouter = require('./routes/adminRoute');
 const CustomError = require("./utils/CustomError");
 let app = express();
@@ -32,7 +31,7 @@ app.use("/public", express.static(path.join(__dirname, "public")));
 
 const corsOptions = {
   origin: "http://localhost:3000", // Only allow requests from this origin
-  methods: ["GET,HEAD,PUT,PATCH,POST,DELETE"],
+  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization", "Secret-Key"], // Allowed headers
   credentials: true, // Allow credentials (cookies, HTTP authentication)
 };
@@ -45,7 +44,6 @@ app.use("/api/v1/category", categoryRouter);
 app.use("/api/v1/topic", topicRouter);
 app.use("/api/v1/admin", adminAuthRouter);
 app.use("/api/v1/ticket", ticketRouter);
-app.use("/api/v1/super-admin", superAdminRouter);
 app.use("/api/v1/admin", adminRouter)
 
 app.all("*", (req, res, next) => {
