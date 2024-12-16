@@ -66,7 +66,14 @@ exports.updateUserPassword = asyncErrorHandler(async (req, res, next) => {
   if (!user) {
     next(new CustomError("user does not exist", 404));
     return;
-    }
+  }
+  if (req.admin.role === 'operator') {
+     res.status(401).json({
+       status: "failed",
+       message: "Unauthorized: You are not allowed to perform this action",
+     });
+     return;
+  }
     if (user.role === 'super-admin') {
         res.status(401).json({
           status: "failed",
@@ -107,7 +114,20 @@ exports.deleteUser = asyncErrorHandler(async (req, res, next) => {
     });
     return;
   }
-  if (admin.role === "super-admin" || admin.role === "admin") {
+  if (req.admin.role === 'operator') {
+    res.status(401).json({
+      status: "failed",
+      message: "Unauthorized: You are not allowed to perform this action",
+    });
+  }
+  if (admin.role === 'super-admin') {
+    res.status(401).json({
+      status: "failed",
+      message: "Unauthorized: You cannot delete super-admin or admin",
+    });
+    return;
+  }
+  if (admin.role === "admin" && req.admin.role !== 'super-admin') {
     res.status(401).json({
       status: "failed",
       message: "Unauthorized: You cannot delete super-admin or admin",
