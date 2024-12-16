@@ -19,9 +19,16 @@ exports.createUser = asyncErrorHandler(async (req, res, next) => {
         message: "Unauthorized: you cannot create admin or super-admin",
       });
       return;
-    }
+  }
+  if (role === 'admin' && req.admin.role !== 'super-admin') {
+     res.status(401).json({
+       status: "failed",
+       message: "Unauthorized: you cannot create admin or super-admin",
+     });
+     return;
+  }
 
-  if (role === 'admin' || role==='super-admin' && req.admin.role === 'admin') {
+  if (req.admin.role === 'operator') {
     res.status(401).json({
       status: "failed",
       message: "Unauthorized: you cannot create admin or super-admin",
