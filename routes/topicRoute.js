@@ -17,7 +17,7 @@ router
   .get(middlewaresTicket.protect, topicController.getAllTopics);
 router
   .route("/getAllTopicsByCategory/:id")
-  .get(authController.protect, topicController.getAllTopicsByCategory);
+  .get(middlewaresTicket.protect, topicController.getAllTopicsByCategory);
 router
   .route("/updateTopic/:id")
   .put(middlewaresAdmin.protectAdmin, topicController.updateTopic);
