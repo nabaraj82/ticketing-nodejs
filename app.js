@@ -36,7 +36,12 @@ const corsOptions = {
     "https://admin-ticketing.cellpay.com.np",
   ], // Only allow requests from this origin
   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization", "Secret-Key"], // Allowed headers
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Secret-Key",
+    "paynet-session-token",
+  ], // Allowed headers
   credentials: true, // Allow credentials (cookies, HTTP authentication)
 };
 
