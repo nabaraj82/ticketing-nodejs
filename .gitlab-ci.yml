@@ -17,25 +17,18 @@ deploy:
     - |
       $knownHostsPath = "$HOME/.ssh/authorized_keys"
       $host = "15.206.186.138"
-      $ssh = New-Object System.Net.Sockets.TcpClient
-      $ssh.Connect($host, 22)
-      $stream = $ssh.GetStream()
-      $stream.Close()
-      $ssh.Close()
-
-      # Manually fetch the EC2 SSH fingerprint and append it to known_hosts file
-      ssh-keygen -F $host || ssh-keygen -R $host
       ssh-keyscan -H $host >> $knownHostsPath
 
-    # Ensure we stop if any command fails by using `set -e`
+    # Ensure the script stops if any command fails by using $ErrorActionPreference
     - $ErrorActionPreference = "Stop"  # This makes the script stop on errors
 
     # SSH into EC2 and run commands
-    - ssh -o StrictHostKeyChecking=no ubuntu@15.206.186.138 << EOF
-        sudo -i
-        cd /var/www/ticketing-backend || exit 1
-        git pull origin main || exit 1
-        pm2 restart all || exit 1
-      EOF
+    - |
+      ssh -o StrictHostKeyChecking=no ubuntu@15.206.186.138 -Command "
+        sudo -i;
+        cd /var/www/ticketing-backend;
+        if ($?) { git pull origin main } else { exit 1 };
+        if ($?) { pm2 restart all } else { exit 1 }
+      "
   only:
     - main  # Only run this job when changes are pushed to the main branch
