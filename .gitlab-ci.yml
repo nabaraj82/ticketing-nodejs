@@ -2,7 +2,7 @@ stages:
   - deploy  # Define the stages of the pipeline
 
 deploy:
-  stage: deploy  # deploy in ec2 ubuntu
+  stage: deploy  # deploy in ec2 
   tags:
     - ticketing #runner tag 
   script:
