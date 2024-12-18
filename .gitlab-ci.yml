@@ -1,24 +1,41 @@
 stages:
-  - deploy # Define the stages of the pipeline
+  - deploy  # Define the stages of the pipeline
 
 deploy:
-  stage: deploy # deploy in ec2
+  stage: deploy  # deploy in EC2
   tags:
-    - ticketing #runner tag to assign runner
+    - ticketing  # runner tag to assign runner
   script:
+    # Ensure the .ssh directory exists
+    #- mkdir -p ~/.ssh
+
     # Write the SSH private key (stored in GitLab CI/CD variable) to a file
     #- echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
     #- chmod 600 ~/.ssh/id_rsa  # Set the correct permissions for the private key
 
-    # Add EC2's IP address to known hosts (prevents SSH authenticity check prompts)
-    - ssh-keyscan -H 15.206.186.138 >> ~/.ssh/authorized_keys
+    # Add EC2's IP address to known hosts (alternative to ssh-keyscan)
+    - |
+      $knownHostsPath = "$HOME/.ssh/authorized_keys"
+      $host = "15.206.186.138"
+      $ssh = New-Object System.Net.Sockets.TcpClient
+      $ssh.Connect($host, 22)
+      $stream = $ssh.GetStream()
+      $stream.Close()
+      $ssh.Close()
+
+      # Manually fetch the EC2 SSH fingerprint and append it to known_hosts file
+      ssh-keygen -F $host || ssh-keygen -R $host
+      ssh-keyscan -H $host >> $knownHostsPath
+
+    # Ensure we stop if any command fails by using `set -e`
+    - set -e
 
     # SSH into EC2 and run commands
-    - ssh -o StrictHostKeyChecking=no ubuntu@15.206.186.138 "
-      sudo -i
-      cd /var/www/ticketing-backend || exit 1 &&
-      git pull origin main || exit 1 &&
-      pm2 restart all || exit 1
-      "
+    - ssh -o StrictHostKeyChecking=no ubuntu@15.206.186.138 << EOF
+        sudo -i
+        cd /var/www/ticketing-backend || exit 1
+        git pull origin main || exit 1
+        pm2 restart all || exit 1
+      EOF
   only:
-    - main # Only run this job when changes are pushed to the main branch
+    - main  # Only run this job when changes are pushed to the main branch
