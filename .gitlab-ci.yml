@@ -1,0 +1,22 @@
+stages:
+  - deploy  # Define the stages of the pipeline
+
+deploy:
+  stage: deploy  # This job will run in the "deploy" stage
+  script:
+    # Write the SSH private key (stored in GitLab CI/CD variable) to a file
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa  # Set the correct permissions for the private key
+
+    # Add EC2's IP address to known hosts (prevents SSH authenticity check prompts)
+    - ssh-keyscan -H 15.206.186.138 >> ~/.ssh/known_hosts
+
+    # SSH into EC2 and run commands
+    - ssh -o StrictHostKeyChecking=no ubuntu@15.206.186.138 "
+      sudo -i
+      cd /var/www/ticketing-backend || exit 1 &&
+      git pull origin main || exit 1 &&
+      pm2 restart all || exit 1
+     "
+  only:
+    - main  # Only run this job when changes are pushed to the main branch
