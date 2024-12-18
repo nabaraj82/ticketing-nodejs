@@ -28,7 +28,7 @@ deploy:
       ssh-keyscan -H $host >> $knownHostsPath
 
     # Ensure we stop if any command fails by using `set -e`
-    - set -e
+    - $ErrorActionPreference = "Stop"  # This makes the script stop on errors
 
     # SSH into EC2 and run commands
     - ssh -o StrictHostKeyChecking=no ubuntu@15.206.186.138 << EOF
