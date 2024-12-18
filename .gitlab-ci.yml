@@ -15,9 +15,8 @@ deploy:
 
     # Add EC2's IP address to known hosts (alternative to ssh-keyscan)
     - |
-      $knownHostsPath = "$HOME/.ssh/authorized_keys"
       $host = "15.206.186.138"
-      ssh-keyscan -H $host >> $knownHostsPath
+      ssh-keyscan -H $host >> ~/.ssh/authorized_keys
 
     # Ensure the script stops if any command fails by using $ErrorActionPreference
     - $ErrorActionPreference = "Stop"  # This makes the script stop on errors
