@@ -4,7 +4,7 @@ stages:
 deploy:
   stage: deploy  # This job will run in the "deploy" stage
   tags:
-    - ticketing #runner tag to assigned runner
+    - ticketing #runner tag 
   script:
     # Write the SSH private key (stored in GitLab CI/CD variable) to a file
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
