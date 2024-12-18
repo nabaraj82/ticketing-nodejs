@@ -14,6 +14,7 @@ const { response } = require("../app");
 
 exports.createTicket = asyncErrorHandler(async (req, res, next) => {
   const imageNames = [];
+  console.log(req.files)
   if (req.files.length > 0) {
     for (const file of req.files) {
       const imageName = randomImageName();
@@ -196,7 +197,7 @@ exports.getAllTickets = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.getAllTicketsByUsername = asyncErrorHandler(async (req, res, next) => {
-  const tickets = await Ticket.find({ username: req.headers["username"] });
+  const tickets = await Ticket.find({ username: req.params.id});
   if (tickets.length <= 0) {
     return res.status(200).json({
       status: "success",

@@ -25,7 +25,7 @@ router
   .get(authController.protect, ticketController.getAllTickets);
 
 router
-  .route("/getAllTicketsByUsername")
+  .route("/getAllTicketsByUsername/:id")
   .get(middlewares.protect, ticketController.getAllTicketsByUsername);
 
 router
