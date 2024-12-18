@@ -1,12 +1,18 @@
 stages:
-  - deploy  # Define the stages of the pipeline
+  - deploy
 
 deploy:
-  stage: deploy  # deploy in EC2 ubuntu
-  tags:
-    - ticketing  # runner tag to assign runner
+  stage: deploy
   script:
-   - apt-get update && apt-get install -y ssh
-   - ssh -i ubuntu@15.206.186.138 "sudo -i && cd /var/www/ticketing-backend && git pull origin main && pm2 restart 0"
+    # Install necessary dependencies
+    - apt-get update && apt-get install -y openssh-client
+
+    # Set up the private key
+    - echo "$SSH_PRIVATE_KEY" > private-key.pem
+    - chmod 600 private-key.pem
+
+    # SSH into the EC2 instance and deploy
+    - ssh -i private-key.pem ubuntu@15.206.186.138 "sudo -i && cd /var/www/ticketing-backend && git pull origin main && pm2 restart 0"
+
   only:
-    - main  # Only run this job when changes are pushed to the main 
+    - main  # This ensures it only runs for changes in the `main` branch
