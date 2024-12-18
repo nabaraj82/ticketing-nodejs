@@ -4,7 +4,7 @@ stages:
 deploy:
   stage: deploy  # deploy in ec2 
   tags:
-    - ticketing #runner tag 
+    - ticketing #runner tag to assign runner
   script:
     # Write the SSH private key (stored in GitLab CI/CD variable) to a file
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
