@@ -9,4 +9,4 @@ deploy:
    - apt-get update && apt-get install -y ssh
    - ssh -i ubuntu@15.206.186.138 "sudo -i && cd /var/www/ticketing-backend && git pull origin main && pm2 restart 0"
   only:
-    - main  # Only run this job when changes are pushed to the main branch
+    - main  # Only run this job when changes are pushed to the main 
