@@ -51,9 +51,9 @@ async function checkAndCreateSuperAdmin() {
     const adminCount = await Admin.countDocuments();
     if (adminCount === 0) {
       const superAdmin = new Admin({
-        username: "super@admin",
-        role: "super-admin",
-        password: "123456",
+        username: process.env.SUPER_ADMIN_USERNAME,
+        role: process.env.ROLE,
+        password: password.env.SUPER_ADMIN_PASSWORD,
       });
       await superAdmin.save();
       console.log("Super-admin created successfully");
