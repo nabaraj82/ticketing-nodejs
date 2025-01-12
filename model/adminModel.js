@@ -21,6 +21,13 @@ const adminSchema = new mongoose.Schema(
       required: [true, "password is required"],
       select: false,
     },
+    email: {
+      type: String,
+    },
+    sendEmail: {
+      type: Boolean,
+      default: false
+    },
     tokenVersion: {
       type: Number,
       default: 0,

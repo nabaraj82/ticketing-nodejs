@@ -1,8 +1,8 @@
 const Ticket = require("../model/ticketModel");
-const firebaseAdmin = require("firebase-admin");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const CustomError = require("../utils/CustomError");
 const randomImageName = require("./../utils/randomImageName");
+const nodeMailer = require("./../utils/nodeMailer");
 const s3 = require("./../aws-config");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const {
@@ -14,7 +14,6 @@ const { response } = require("../app");
 
 exports.createTicket = asyncErrorHandler(async (req, res, next) => {
   const imageNames = [];
-  console.log(req.files)
   if (req.files.length > 0) {
     for (const file of req.files) {
       const imageName = randomImageName();
@@ -53,6 +52,8 @@ exports.createTicket = asyncErrorHandler(async (req, res, next) => {
     }
 
     const responseTicket = { ...savedTicket.toObject(), imageUrls };
+    nodeMailer(responseTicket);
+
     res.status(201).json({
       status: "success",
       message: "New ticket created successfully",
@@ -71,6 +72,7 @@ exports.createTicket = asyncErrorHandler(async (req, res, next) => {
       imageNames: [],
     });
     const savedTicket = await newTicket.save();
+    nodeMailer(savedTicket);
     res.status(201).json({
       status: "success",
       message: "New ticket created successfully",
@@ -197,7 +199,7 @@ exports.getAllTickets = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.getAllTicketsByUsername = asyncErrorHandler(async (req, res, next) => {
-  const tickets = await Ticket.find({ username: req.params.id});
+  const tickets = await Ticket.find({ username: req.params.id });
   if (tickets.length <= 0) {
     return res.status(200).json({
       status: "success",

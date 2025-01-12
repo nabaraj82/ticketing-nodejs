@@ -1,15 +1,23 @@
 const Admin = require("../model/adminModel");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const bcrypt = require("bcryptjs");
+const CustomError = require("../utils/CustomError");
 
 
 exports.createUser = asyncErrorHandler(async (req, res, next) => {
-  const { username, password, role } = req.body;
+  const { username, password, role, email } = req.body;
 
   if (await Admin.findOne({ username })) {
     res.status(409).json({
       status: "failed",
       message: "username already exists.",
+    });
+    return;
+  }
+  if (await Admin.findOne({ email })) {
+    res.status(409).json({
+      status: "failed",
+      message: "email already exists.",
     });
     return;
   }
@@ -36,7 +44,7 @@ exports.createUser = asyncErrorHandler(async (req, res, next) => {
     return;
   }
 
-  const user = new Admin({ username, password, role });
+  const user = new Admin({ username, password, role, email });
   const newUser = await user.save();
   const userWithoutPassword = newUser.toObject();
   delete userWithoutPassword.password;
@@ -104,6 +112,32 @@ exports.updateUserPassword = asyncErrorHandler(async (req, res, next) => {
     },
   });
 });
+
+exports.emailAlertUpdate = asyncErrorHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const user = await Admin.findById(id);
+  if (!user) {
+    res.status(404).json({
+      status: "failed",
+      message: "user not found",
+    });
+    return;
+  }
+  if (typeof req.body.sendEmail !== 'boolean') {
+     res.status(403).json({
+       status: "failed",
+       message: "invalid agrument! required boolean.",
+     });
+     return;
+  }
+  const updatedUser = await Admin.findByIdAndUpdate(id, { sendEmail: req.body.sendEmail }, { new: true });
+   res.status(200).json({
+     status: "success",
+     data: {
+       user: updatedUser
+     }
+   });
+})
 
 exports.deleteUser = asyncErrorHandler(async (req, res, next) => {
   const admin = await Admin.findById(req.params.id);

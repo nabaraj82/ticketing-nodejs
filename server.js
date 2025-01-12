@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
 const cron = require("node-cron");
-const firebaseAdmin = require("firebase-admin");
-const serviceAccount = require("./firebase-service-account.json");
 const Admin = require("./model/adminModel");
 const dotenv = require("dotenv");
 dotenv.config({
@@ -26,9 +24,6 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-firebaseAdmin.initializeApp({
-  credential: firebaseAdmin.credential.cert(serviceAccount),
-});
 
 const server = app.listen(port, () => {
   console.log(`Server has started at http://localhost:${port}`);
@@ -53,7 +48,7 @@ async function checkAndCreateSuperAdmin() {
       const superAdmin = new Admin({
         username: process.env.SUPER_ADMIN_USERNAME,
         role: process.env.ROLE,
-        password: password.env.SUPER_ADMIN_PASSWORD,
+        password: process.env.SUPER_ADMIN_PASSWORD,
       });
       await superAdmin.save();
       console.log("Super-admin created successfully");
@@ -61,7 +56,8 @@ async function checkAndCreateSuperAdmin() {
       console.log("Admins already exist. Skipping super-admin creation.");
     }
   } catch (error) {
-    console.error("Error creating super-admin:", err);
+    console.log(error)
+    console.error("Error creating super-admin:");
   }
 }
 

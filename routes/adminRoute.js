@@ -13,6 +13,8 @@ router
   .route("/update/user-password")
   .put(middlewares.protectAdmin, adminController.updateUserPassword);
 
+router.route("/updateEmailAlert/:id").put(middlewares.protectAdmin, adminController.emailAlertUpdate);
+
 router
   .route("/delete/user/:id")
   .delete(middlewares.protectAdmin, adminController.deleteUser);

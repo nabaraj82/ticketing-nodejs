@@ -52,7 +52,7 @@ app.use(express.json());
 app.use(morgan("combined"));
 app.use("/api/v1/category", categoryRouter);
 app.use("/api/v1/topic", topicRouter);
-app.use("/api/v1/admin", adminAuthRouter);
+app.use("/api/v1", adminAuthRouter);
 app.use("/api/v1/ticket", ticketRouter);
 app.use("/api/v1/admin", adminRouter);
 
