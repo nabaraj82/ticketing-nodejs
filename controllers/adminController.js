@@ -5,15 +5,8 @@ const CustomError = require("../utils/CustomError");
 
 
 exports.createUser = asyncErrorHandler(async (req, res, next) => {
-  const { username, password, role, email } = req.body;
+  const { email, password, role } = req.body;
 
-  if (await Admin.findOne({ username })) {
-    res.status(409).json({
-      status: "failed",
-      message: "username already exists.",
-    });
-    return;
-  }
   if (await Admin.findOne({ email })) {
     res.status(409).json({
       status: "failed",
@@ -44,7 +37,7 @@ exports.createUser = asyncErrorHandler(async (req, res, next) => {
     return;
   }
 
-  const user = new Admin({ username, password, role, email });
+  const user = new Admin({ email, password, role });
   const newUser = await user.save();
   const userWithoutPassword = newUser.toObject();
   delete userWithoutPassword.password;
@@ -69,7 +62,8 @@ exports.fetchAllUsers = asyncErrorHandler(async(req, res, next) => {
   })
 })
 exports.updateUserPassword = asyncErrorHandler(async (req, res, next) => {
-    const { id, password } = req.body;
+  const { id, password } = req.body;
+  console.log(req.body)
     const user = await Admin.findById(id);
   if (!user) {
     next(new CustomError("user does not exist", 404));

@@ -3,13 +3,24 @@ const bcrypt = require("bcryptjs");
 
 const adminSchema = new mongoose.Schema(
   {
-    username: {
+    email: {
       type: String,
-      unique: [true, "username already exist"],
-      maxlength: [30, "username must not exceed more than 30 characters"],
-      trim: true,
-      required: [true, "username is required"],
+        unique: [true, "email already exist"],
+        maxlength: [50, "email must not exceed more than 50 characters"],
+        trim: true,
+        required: [true, "email is required"],
     },
+    sendEmail: {
+      type: Boolean,
+      default: false,
+    },
+    // username: {
+    //   type: String,
+    //   unique: [true, "username already exist"],
+    //   maxlength: [30, "username must not exceed more than 30 characters"],
+    //   trim: true,
+    //   required: [true, "username is required"],
+    // },
     role: {
       type: String,
       enum: ["super-admin", "admin", "operator"],
@@ -20,13 +31,6 @@ const adminSchema = new mongoose.Schema(
       type: String,
       required: [true, "password is required"],
       select: false,
-    },
-    email: {
-      type: String,
-    },
-    sendEmail: {
-      type: Boolean,
-      default: false
     },
     tokenVersion: {
       type: Number,

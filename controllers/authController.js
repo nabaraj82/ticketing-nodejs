@@ -22,7 +22,7 @@ exports.signIn = asyncErrorHandler(async (req, res, next) => {
 
   const [username, password] = decodedCredentials.split(":");
 
-  const admin = await Admin.findOne({ username }).select("+password");
+  const admin = await Admin.findOne({ email: username }).select("+password");
   if (!admin || !(await admin.comparePasswordInDb(password, admin.password))) {
     const error = new CustomError("Incorrect username or password", 400);
     return next(error);
