@@ -33,7 +33,7 @@ exports.createTicket = asyncErrorHandler(async (req, res, next) => {
       username: req.body.username,
       mobileNo: req.body.mobileNo,
       category: req.body.category,
-      topic: req.body.topic,
+      // topic: req.body.topic,
       description: req.body.description,
       imageNames: imageNames,
     });
@@ -67,7 +67,7 @@ exports.createTicket = asyncErrorHandler(async (req, res, next) => {
       username: req.body.username,
       mobileNo: req.body.mobileNo,
       category: req.body.category,
-      topic: req.body.topic,
+      // topic: req.body.topic,
       description: req.body.description,
       imageNames: [],
     });
