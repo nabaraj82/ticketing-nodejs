@@ -35,6 +35,7 @@ const corsOptions = {
     "https://localhost:3000",
     "https://admin-ticketing.cellpay.com.np",
     "http://localhost:5173",
+    "https://demoapp.cellpay.com.np",
   ], // Only allow requests from this origin
   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
   allowedHeaders: [
