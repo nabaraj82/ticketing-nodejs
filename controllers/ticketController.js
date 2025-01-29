@@ -199,8 +199,8 @@ exports.getAllTickets = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.getAllTicketsByUsername = asyncErrorHandler(async (req, res, next) => {
-  const tickets = await Ticket.find({ username: req.params.id });
-  if (tickets.length <= 0) {
+  const tickets = await Ticket.find({ username: req.params.id }).sort({createdAt: -1});
+  if (tickets.length === 0) {
     return res.status(200).json({
       status: "success",
       message: "No ticket has been created",
