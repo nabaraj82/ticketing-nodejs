@@ -25,6 +25,7 @@ const ticketSchema = new mongoose.Schema(
     description: {
       type: String,
       required: [true, "description is required"],
+      maxlength: [200, "Description cannot be more than 200 characters"],
     },
     imageNames: {
       type: [String],
