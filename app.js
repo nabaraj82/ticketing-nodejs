@@ -15,6 +15,7 @@ const adminAuthRouter = require("./routes/authRoute");
 const ticketRouter = require("./routes/ticketRoute");
 const adminRouter = require("./routes/adminRoute");
 const CustomError = require("./utils/CustomError");
+
 let app = express();
 app.use(cookieParser());
 app.use(compression()); //to compress response body to optimize performance
@@ -36,6 +37,7 @@ const corsOptions = {
     "https://admin-ticketing.cellpay.com.np",
     "http://localhost:5173",
     "https://demoapp.cellpay.com.np",
+    "https://web.cellpay.com.np",
   ], // Only allow requests from this origin
   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
   allowedHeaders: [

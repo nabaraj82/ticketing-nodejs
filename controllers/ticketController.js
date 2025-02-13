@@ -5,6 +5,7 @@ const randomImageName = require("./../utils/randomImageName");
 const nodeMailer = require("./../utils/nodeMailer");
 const s3 = require("./../aws-config");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+
 const {
   PutObjectCommand,
   GetObjectCommand,
@@ -268,6 +269,7 @@ exports.updateTicketStatus = asyncErrorHandler(async (req, res, next) => {
       ...originalObject,
       imageUrls,
     };
+
     res.status(200).json({
       status: "success",
       message: "status updated successfully",
