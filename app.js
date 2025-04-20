@@ -56,10 +56,10 @@ app.use("*", cors(corsOptions));
 
 app.use(express.json());
 app.use(morgan("combined"));
+
+//Ip whilist middleware
 app.use((req, res, next) => {
   const clientIp = req.ip.replace(/^::ffff:/, "").replace(/^::/, "");
-  console.log(clientIp)
-
   if (clientIp !== process.env.WHITELISTED_IP ) {
     return res.status(403).json({
       error: "Access denied",
