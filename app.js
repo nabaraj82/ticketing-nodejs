@@ -22,6 +22,9 @@ app.use(compression()); //to compress response body to optimize performance
 app.use(helmet()); //secure Express apps by setting HTTP response headers.
 app.use(sanitize());
 app.use(xss());
+
+
+
 let limiter = rateLimit({
   max: 1000,
   windowMs: 60 * 60 * 1000,
@@ -53,6 +56,19 @@ app.use("*", cors(corsOptions));
 
 app.use(express.json());
 app.use(morgan("combined"));
+app.use((req, res, next) => {
+  const clientIp = req.ip.replace(/^::ffff:/, "").replace(/^::/, "");
+  console.log(clientIp)
+
+  if (clientIp !== process.env.WHITELISTED_IP ) {
+    return res.status(403).json({
+      error: "Access denied",
+      message: "Your IP address is not authorized to access this resource",
+    });
+  }
+
+  next();
+});
 app.use("/api/v1/category", categoryRouter);
 app.use("/api/v1/topic", topicRouter);
 app.use("/api/v1", adminAuthRouter);
