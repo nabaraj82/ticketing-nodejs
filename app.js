@@ -14,6 +14,7 @@ const topicRouter = require("./routes/topicRoute");
 const adminAuthRouter = require("./routes/authRoute");
 const ticketRouter = require("./routes/ticketRoute");
 const adminRouter = require("./routes/adminRoute");
+const blogRouter = require("./routes/blogRoute");
 const CustomError = require("./utils/CustomError");
 
 let app = express();
@@ -36,11 +37,13 @@ app.use("/public", express.static(path.join(__dirname, "public")));
 const corsOptions = {
   origin: [
     "http://localhost:3000",
+    "http://localhost:3001",
     "https://localhost:3000",
     "https://admin-ticketing.cellpay.com.np",
     "http://localhost:5173",
     "https://demoapp.cellpay.com.np",
     "https://app.cellpay.com.np",
+    "https://cellpay.com.np",
   ], // Only allow requests from this origin
   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
   allowedHeaders: [
@@ -57,7 +60,7 @@ app.use("*", cors(corsOptions));
 app.use(express.json());
 app.use(morgan("combined"));
 
-//Ip whilist middleware
+// Ip whilist middleware
 app.use((req, res, next) => {
   const clientIp = req.ip.replace(/^::ffff:/, "").replace(/^::/, "");
   if (clientIp !== process.env.WHITELISTED_IP ) {
@@ -74,6 +77,7 @@ app.use("/api/v1/topic", topicRouter);
 app.use("/api/v1", adminAuthRouter);
 app.use("/api/v1/ticket", ticketRouter);
 app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1", blogRouter);
 
 app.all("*", (req, res, next) => {
   const err = new CustomError(
